@@ -69,6 +69,7 @@ class Gp(object):
     def random(cls):
         return Gp(random.randint(0, Gp.p)) ;
 
+## Class Constants
 Gp.zero = Gp(0) ;
 Gp.one = Gp(1) ;
 

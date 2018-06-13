@@ -1,5 +1,7 @@
 import math ;
 from ECC_Arith import ECC_Arith ;
+from Gp import Gp ;
+from p_2 import p_2 ;
 import copy ;
 
 
@@ -9,46 +11,47 @@ class ECC_Pairing(object):
 
     @staticmethod
     def line(P, Q, Div):
+        # Special cases
+        if P == -Q:
+            return ECC_Pairing.vertical(P, Div) ;
         ## curve is the Vanishing Set of y^2 = (x^3+a*x+b)
         a = P.a ;
         b = P.b ;
-        p = P.p ;
-        x_diff = (Q.x - P.x)%p ;
-        y_diff = (Q.y - P.y)%p ;
-        # TODO IF P == -Q
-        if x_diff == 0:
-            slope = ((3*P.x**2+a)*ECC_Arith.gcd(2*P.y, p)[1])%p ;
+        x_diff = (Q.x - P.x) ;
+        y_diff = (Q.y - P.y) ;
+        if x_diff == P.field.zero:
+            tmp = P.x**2
+            slope = ((tmp+tmp+tmp+a) * ~(P.y+P.y)) ;
         else:
-            slope = (y_diff*ECC_Arith.gcd(x_diff, p)[1])%p ;
+            slope = (y_diff * ~x_diff) ;
         ## A line equation is given by y - A*x - B
         ## where A is the slope and B the intercept
         ## Or l(x,y) = y - A*(x-P.x)+P.y
-        ret = 0 ;
+        ret = P.field.one ;
         for d in Div:
             pt = d[0] ;
             n = d[1] ;
-            tmp = (pt.y - slope*(pt.x - P.x) + P.y)%p ;
+            tmp = (pt.y - slope*(pt.x - P.x) - P.y) ;
             if n < 0:
                 n = -n ;
-                tmp = ECC_Arith.gcd(tmp, p)[1] ;
-            tmp = pow(tmp, n, p) ;
-            ret += tmp ;
+                tmp = tmp.__invert__() ;
+            tmp = tmp**n ;
+            ret *= tmp ;
         return ret ;
 
     @staticmethod
     def vertical(P, Div):
         # v(x,y) = x-P.x
-        p = P.p;
-        ret = 0 ;
+        ret = P.field.one ;
         for d in Div:
             pt = d[0] ;
             n = d[1] ;
-            tmp = (pt.x - P.x)%p ;
+            tmp = (pt.x - P.x) ;
             if n < 0:
                 n = -n ;
-                tmp = ECC_Arith.gcd(tmp, p)[1] ;
-            tmp = pow(tmp, n, p) ;
-            ret += tmp ;
+                tmp = tmp.__invert__() ;
+            tmp = tmp**n ;
+            ret *= tmp ;
         return ret ;
 
     @staticmethod
@@ -57,63 +60,79 @@ class ECC_Pairing(object):
         # Let f be a rational function such D = (f) ;
         # Then, this function returns f(Div) ;
     def Miller(P, Div, m):
-        str_scalar = bin(m)[3:] ; # do not consider the most significant bit
+        str_scalar = bin(m)[3:] ; # Do not consider the most significant bit
         R = copy.deepcopy(P) ;
-        f = 1 ;
-        p = P.p ;
+        f = P.field.one ;
         for s in str_scalar:
+            print("R => "+str(R)+str(" vs ")+str(P)) ;
             l_RR = ECC_Pairing.line(R, R, Div) ;
             R = R+R ;
             v_R = ECC_Pairing.vertical(R, Div) ;
-            f = (f**2*l_RR*ECC_Arith.gcd(v_R, p)[1])%p ;
+            f = ((f ** 2) * l_RR * ~v_R) ;
             if s == '1':
                 l_RP = ECC_Pairing.line(R, P, Div);
                 R = R+P ;
                 v_R = ECC_Pairing.vertical(R, Div);
-                f = (f * l_RP * ECC_Arith.gcd(v_R, p)[1]) % p;
+                f = (f * l_RP * ~v_R)
         return f ;
 
+    @staticmethod
+    def Pairing(P, ordP, Q, ordQ):
+        P2 = P+P ;
+        Q2 = Q+Q ;
+        DivP = [(P2,1), (P,-1)] ;
+        DivQ = [(Q2, 1), (Q, -1)];
+        num = ECC_Pairing.Miller(P, DivQ, ordP);
+        den = ECC_Pairing.Miller(Q, DivP, ordQ);
+        den = ECC_Arith.gcd(den, ECC_Arith.p)[1];
+        return (num * den % ECC_Arith.p);
+
+
+
 if __name__ == "__main__":
-    # ECC_Arith.set_curve(1,1,23) ;
-    gen = ECC_Arith(2,5) ; # Order 12
-    points = [i*gen for i in range(12)] ;
+    #
+    # ECC_Arith.set_curve(p_2, p_2(22), p_2(0)) ;
+    #
+    # P = ECC_Arith(p_2(2), p_2(11)) ;
+    # Q = ECC_Arith(p_2(21, 0), p_2(0, 12))
+    #
+    # R = ECC_Arith(p_2(0, 17), p_2(21, 2))
+    # S = ECC_Arith(p_2(18, 10), p_2(13, 13))
+    #
+    # P2 = P+R ;
+    # Q2 = Q+S ;
+    #
+    # ordP = P.get_order();
+    # ordQ = Q.get_order();
+    #
+    # DivP = [(P2,1), (R,-1)] ;
+    # DivQ = [(Q2, 1), (S, -1)];
+    #
+    # num = ECC_Pairing.Miller(P, DivQ, ordP);
+    # den = ECC_Pairing.Miller(Q, DivP, ordQ);
+    # w = num*~den ;
+    #
+    # print(w) ;
+    # print(w**3) ;
 
-    print("All the points on E") ;
-    for p in points:
-        print(p) ;
-    p_1 = points[4] ; order_p1 = 3 ;
-    p_2 = points[9] ; order_p2 = 4 ;
-    p_3 = points[3] ; order_p3 = 4 ;
+    ECC_Arith.set_curve(Gp, Gp(17), Gp(6)) ;
+    P = ECC_Arith(Gp(10), Gp(7)) ;
+    Q = ECC_Arith(Gp(16), Gp(2)) ;
+    print("<P>") ;
+    for i in range(P.get_order()):
+        print(i*P) ;
+    print("<Q>");
+    for i in range(Q.get_order()):
+        print(i*Q) ;
 
-    print("Chosen Points for Testing Pairing") ;
-    print(p_1) ;
-    print(p_2) ;
-    print(p_3) ;
+    DivQ = [(Q, 1)];
+    Eval = ECC_Pairing.Miller(P, DivQ, 5) ;
 
-    p_1_3 = p_1+p_3 ; order_p_1_3 = 12 ;
-    print(p_1_3) ;
+    x = Q.x ;
+    y = Q.y ;
+    # Cp = (x+Gp(22))*y+Gp(5)*x**2+Gp(3)*x+Gp(5) ;
+    # Cp = (y+Gp(2)*x+Gp(19))*~(x+Gp(16)) ;
+    Cp = (Gp(3)*y+x**2+Gp(9)*x+Gp(19))*~(x+Gp(16)) ;
 
-
-    print("Values of Pairing")
-    Div_1 = [(p_1+p_1, 1), (p_1, -1)] ;
-    Div_2 = [(p_2 + p_2, 1), (p_2, -1)];
-    Div_1_3 = [(p_1_3 + p_1_3, 1), (p_1_3, -1)];
-    Div_3 = [(p_3 + p_3, 1), (p_3, -1)];
-
-    num = ECC_Pairing.Miller(p_2, Div_1, order_p2) ;
-    den = ECC_Arith.gcd(ECC_Pairing.Miller(p_1, Div_2, order_p1), ECC_Arith.p)[1] ;
-    weil = (num*den)%ECC_Arith.p ;
-    print(weil) ;
-
-    num = ECC_Pairing.Miller(p_2, Div_1_3, order_p2) ;
-    den = ECC_Arith.gcd(ECC_Pairing.Miller(p_1_3, Div_2, order_p_1_3), ECC_Arith.p)[1] ;
-    weil = (num*den)%ECC_Arith.p ;
-    print(weil);
-
-    num = ECC_Pairing.Miller(p_2, Div_3, order_p2);
-    den = ECC_Arith.gcd(ECC_Pairing.Miller(p_3, Div_2, order_p3), ECC_Arith.p)[1];
-    weil = (num * den) % ECC_Arith.p;
-    print(weil);
-
-
-
+    print(Eval) ;
+    print(Cp) ;
