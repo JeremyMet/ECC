@@ -14,6 +14,10 @@ class ECC_Pairing(object):
         # Special cases
         if P == -Q:
             return ECC_Pairing.vertical(P, Div) ;
+        if P == ECC_Arith.Inf():
+            return ECC_Pairing.vertical(Q, Div) ;
+        if Q == ECC_Arith.Inf():
+            return ECC_Pairing.vertical(P, Div) ;
         ## curve is the Vanishing Set of y^2 = (x^3+a*x+b)
         a = P.a ;
         b = P.b ;
@@ -42,6 +46,8 @@ class ECC_Pairing(object):
     @staticmethod
     def vertical(P, Div):
         # v(x,y) = x-P.x
+        if P == ECC_Arith.Inf():
+            return P.field.one ;
         ret = P.field.one ;
         for d in Div:
             pt = d[0] ;
@@ -90,49 +96,50 @@ class ECC_Pairing(object):
 
 
 if __name__ == "__main__":
-    #
-    # ECC_Arith.set_curve(p_2, p_2(22), p_2(0)) ;
-    #
-    # P = ECC_Arith(p_2(2), p_2(11)) ;
-    # Q = ECC_Arith(p_2(21, 0), p_2(0, 12))
-    #
-    # R = ECC_Arith(p_2(0, 17), p_2(21, 2))
-    # S = ECC_Arith(p_2(18, 10), p_2(13, 13))
-    #
-    # P2 = P+R ;
-    # Q2 = Q+S ;
-    #
-    # ordP = P.get_order();
-    # ordQ = Q.get_order();
-    #
-    # DivP = [(P2,1), (R,-1)] ;
-    # DivQ = [(Q2, 1), (S, -1)];
-    #
-    # num = ECC_Pairing.Miller(P, DivQ, ordP);
-    # den = ECC_Pairing.Miller(Q, DivP, ordQ);
-    # w = num*~den ;
-    #
-    # print(w) ;
-    # print(w**3) ;
 
-    ECC_Arith.set_curve(Gp, Gp(17), Gp(6)) ;
-    P = ECC_Arith(Gp(10), Gp(7)) ;
-    Q = ECC_Arith(Gp(16), Gp(2)) ;
-    print("<P>") ;
-    for i in range(P.get_order()):
-        print(i*P) ;
-    print("<Q>");
-    for i in range(Q.get_order()):
-        print(i*Q) ;
+    ECC_Arith.set_curve(p_2, p_2(22), p_2(0)) ;
 
-    DivQ = [(Q, 1)];
-    Eval = ECC_Pairing.Miller(P, DivQ, 5) ;
+    P = ECC_Arith(p_2(2), p_2(11)) ;
+    Q = ECC_Arith(p_2(21, 0), p_2(0, 12))
 
-    x = Q.x ;
-    y = Q.y ;
+    R = ECC_Arith(p_2(0, 17), p_2(21, 2))
+    S = ECC_Arith(p_2(18, 10), p_2(13, 13))
+
+    P2 = P+R ;
+    Q2 = Q+S ;
+
+    ordP = P.get_order();
+    ordQ = Q.get_order();
+
+    DivP = [(P2, 1), (R, -1)] ;
+    DivQ = [(Q2, 1), (S, -1)];
+
+    num = ECC_Pairing.Miller(P, DivQ, ordP);
+    den = ECC_Pairing.Miller(Q, DivP, ordQ);
+    w = num*~den ;
+
+    print(w) ;
+    print(w**3) ;
+
+    # ECC_Arith.set_curve(Gp, Gp(17), Gp(6)) ;
+    # P = ECC_Arith(Gp(10), Gp(7)) ;
+    # Q = ECC_Arith(Gp(16), Gp(2)) ;
+    # print("<P>") ;
+    # for i in range(P.get_order()):
+    #     print(i*P) ;
+    # print("<Q>");
+    # for i in range(Q.get_order()):
+    #     print(i*Q) ;
+    #
+    # DivQ = [(Q, 1)];
+    # Eval = ECC_Pairing.Miller(P, DivQ, 5) ;
+    #
+    # x = Q.x ;
+    # y = Q.y ;
     # Cp = (x+Gp(22))*y+Gp(5)*x**2+Gp(3)*x+Gp(5) ;
-    # Cp = (y+Gp(2)*x+Gp(19))*~(x+Gp(16)) ;
-    Cp = (Gp(3)*y+x**2+Gp(9)*x+Gp(19))*~(x+Gp(16)) ;
-
-    print(Eval) ;
-    print(Cp) ;
+    # # Cp = (y+Gp(2)*x+Gp(19))*~(x+Gp(16)) ;
+    # # Cp = (Gp(3)*y+x**2+Gp(9)*x+Gp(19))*~(x+Gp(16)) ;
+    # # Cp = ((x+Gp(22))*y+Gp(5)*x**2+Gp(3)*x+Gp(5))*~(x+Gp(13)) ;
+    #
+    # print(Eval) ;
+    # print(Cp) ;
