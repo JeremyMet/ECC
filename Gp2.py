@@ -116,4 +116,4 @@ if __name__ == "__main__":
     c = b.sqrt() ;
     print(str(a)+" || "+str(b)+" || "+str(c));
     d = Gp2.zero ;
-    a/d ;  
+

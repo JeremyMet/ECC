@@ -39,7 +39,10 @@ class ECC_Pairing(object):
             tmp = (pt.y - slope*(pt.x - P.x) - P.y) ;
             if n < 0:
                 n = -n ;
-                tmp = tmp.__invert__() ;
+                if tmp == P.field.zero:
+                    return P.field.zero ;
+                else:
+                    tmp = tmp.__invert__() ;
             tmp = tmp**n ;
             ret *= tmp ;
         return ret ;
@@ -56,7 +59,10 @@ class ECC_Pairing(object):
             tmp = (pt.x - P.x) ;
             if n < 0:
                 n = -n ;
-                tmp = tmp.__invert__() ;
+                if tmp == P.field.zero:
+                    return P.field.zero ;
+                else:
+                    tmp = tmp.__invert__() ;
             tmp = tmp**n ;
             ret *= tmp ;
         return ret ;
@@ -74,11 +80,15 @@ class ECC_Pairing(object):
             l_RR = ECC_Pairing.line(R, R, Div) ;
             R = R+R ;
             v_R = ECC_Pairing.vertical(R, Div) ;
+            if v_R == P.field.zero:
+                return P.field.zero ;
             f = ((f ** 2) * l_RR * ~v_R) ;
             if s == '1':
                 l_RP = ECC_Pairing.line(R, P, Div);
                 R = R+P ;
                 v_R = ECC_Pairing.vertical(R, Div);
+                if v_R == P.field.zero:
+                    return P.field.zero;
                 f = (f * l_RP * ~v_R)
         return f ;
 
@@ -94,8 +104,11 @@ class ECC_Pairing(object):
             ordQ = Q.get_order();
             DivP = [(P2, 1), (R, -1)];
             DivQ = [(Q2, 1), (S, -1)];
-            num = ECC_Pairing.Miller(P, DivQ, ordP) * (ECC_Pairing.vertical(P2, DivQ) / ECC_Pairing.line(P, R, DivQ)) ** ordP;
-            den = ECC_Pairing.Miller(Q, DivP, ordQ) * (ECC_Pairing.vertical(Q2, DivP) / ECC_Pairing.line(Q, S, DivP)) ** ordQ;
+            v_0 = ECC_Pairing.line(P, R, DivQ) ;
+            v_1 = ECC_Pairing.line(Q, S, DivP) ;
+            if v_0 != P.field.zero  and v_1 != P.field.zero:
+                num = ECC_Pairing.Miller(P, DivQ, ordP) * (ECC_Pairing.vertical(P2, DivQ) / v_0) ** ordP;
+                den = ECC_Pairing.Miller(Q, DivP, ordQ) * (ECC_Pairing.vertical(Q2, DivP) / v_1) ** ordQ;
         w = num / den;
         return w ;
 
@@ -108,9 +121,13 @@ if __name__ == "__main__":
     ECC_Arith.set_curve(Gp2, Gp2(Gp(22),Gp(0)), Gp2(Gp(0), Gp(0))) ;
     P = ECC_Arith(Gp2(Gp(2), Gp(0)), Gp2(Gp(11), Gp(0))) ;
     Q = ECC_Arith(Gp2(Gp(21), Gp(0)), Gp2(Gp(0), Gp(12))) ;
+    R = ECC_Arith.random_point() ;
 
-    while(True):
-        print(ECC_Pairing.Pairing(P, Q)) ;
+
+    w_0 = ECC_Pairing.Pairing(P, Q) ;
+    w_1 = ECC_Pairing.Pairing(P+P, Q);
+
+    print(str(w_0*w_0)+" ... "+str(w_1)) ;
 
 
 
