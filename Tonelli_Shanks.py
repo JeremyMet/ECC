@@ -1,11 +1,18 @@
 
+def IsQuadraticResidue(n, p):
+    if n == 0:
+        return True ;
+    else:
+        return (pow(n, (p-1) >> 1, p) == 1) ;
 
+# This function returns a positive integer 0 <= r <= p-1 such that r² = n mod p.
+# If n is not a quadratic residue, then it returns -1
 
 def Tonelli_Shanks(n, p):
 
-    # Find is n is a quadratic residue.
+    # Find if n is a quadratic residue.
     if pow(n, (p-1) >> 1, p) == p-1:
-        return 0 ;
+        return -1 ;
 
     # Find Q and S such p-1 = Q*2^S.
     S = 0 ;

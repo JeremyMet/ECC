@@ -1,6 +1,7 @@
 
 import copy ;
 import random ;
+from Tonelli_Shanks import * ;
 
 class p_2(): # mod (i^2+1)
 
@@ -132,6 +133,17 @@ class p_2(): # mod (i^2+1)
         return p_2(x, y) ;
 
 
+    def sqrt(self):
+        sqrt = lambda x : Tonelli_Shanks(x, p_2.p) ;
+        a = self.x ;
+        b = self.y ;
+        x = sqrt((a+sqrt(a**2+b**2))/p_2(2)) ;
+        y = sqrt((-a+sqrt(a**2+b**2))/p_2(p)) ;
+        return p_2(x, y) ;
+
+
+
+
 p_2.zero = p_2(0, 0) ;
 p_2.one = p_2(1, 0) ;
 
@@ -141,4 +153,5 @@ if __name__ == "__main__":
     print(a*a*a*a*a) ;
     print(a**5)
     print(type(a)==int) ;
+    b = a.sqrt() ;
 

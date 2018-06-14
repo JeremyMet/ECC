@@ -1,8 +1,8 @@
 import copy ;
 import random ;
 from Gp import Gp ;
-from p_2 import p_2 ;
-from Tonelli_Shanks import Tonelli_Shanks
+from Gp2 import Gp2 ;
+
 
 class ECC_Arith:
 
@@ -13,7 +13,7 @@ class ECC_Arith:
 
     @staticmethod
     def Inf():
-        tmp = ECC_Arith.field(-1) ;
+        tmp = -ECC_Arith.field.infinite ;
         return ECC_Arith(tmp, tmp, False) ; # Every value should be positive so negative is a way to distinguish Infinity point.
                                             # "Simulate Constant, not perfect, I don't like this solution that much".
 
@@ -26,7 +26,7 @@ class ECC_Arith:
 
     @classmethod
     def is_in_E(cls, x, y):
-        return ((y**2 - x**3-ECC_Arith.a*x-ECC_Arith.b) == ECC_Arith.field.zero) or (x == -1 and y == -1) ;
+        return ((y**2 - x**3-ECC_Arith.a*x-ECC_Arith.b) == ECC_Arith.field.zero) or (x == ECC_Arith.field.infinite and y == ECC_Arith.field.infinite) ;
 
     def __init__(self, x, y, check = True):
         if check and not(ECC_Arith.is_in_E(x, y)):
@@ -88,17 +88,13 @@ class ECC_Arith:
     @staticmethod
     # For now, only work for Gp for now (no extension).
     def random_point():
-        has_square_root = ECC_Arith.field(0) ;
-        while(has_square_root  != ECC_Arith.field.one):
+        has_square_root = False ;
+        while(not(has_square_root)):
             x = ECC_Arith.field.random() ;
             tmp = (x**3+ECC_Arith.a*x+ECC_Arith.b) ;
-            has_square_root = tmp**((ECC_Arith.field.p-1)//2) ;
-        if ECC_Arith.field.p%4 == 3:
-            return ECC_Arith(x, tmp**((ECC_Arith.field.p+1)//4)) ;
-        else:
-            y = Tonelli_Shanks(tmp, ECC_Arith.field.p) ;
-            y = ECC_Arith.field(y) ;
-            return ECC_Arith(x, y) ;
+            y = tmp.sqrt() ;
+            has_square_root = (y != ECC_Arith.field.is_quadratic)
+        return ECC_Arith(x, y) ;
 
     # Naive method for now :-(
     def get_order(self):
@@ -110,9 +106,13 @@ class ECC_Arith:
         return cpt ;
 
 if __name__ == '__main__':
-    p_2.p = 23 ;
-    ECC_Arith.set_curve(p_2, p_2(22,0), p_2(0,0)) ;
-    p_1 = ECC_Arith(p_2(21, 0), p_2(0, 12));
+    Gp.set_p(23) ;
+    ECC_Arith.set_curve(Gp2, Gp2(Gp(22),Gp(0)), Gp2(Gp(0),Gp(0))) ;
+    p_1 = ECC_Arith(Gp2(Gp(21), Gp(0)), Gp2(Gp(0), Gp(12)));
+    p_2 = ECC_Arith.random_point() ;
     print(p_1.get_order()) ;
     for i in range(p_1.get_order()):
         print(i*p_1) ;
+    print(p_2.get_order()) ;
+    for i in range(p_2.get_order()):
+        print(i*p_2) ;

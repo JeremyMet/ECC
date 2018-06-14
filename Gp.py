@@ -36,7 +36,7 @@ class Gp(object):
         return Gp(x) ;
 
     def __sub__(self, other):
-        return self+(-other) ;
+        return (self+(-other)) ;
 
     def __mul__(self, other):
         x = (self.x*other.x)%Gp.p ;
@@ -66,13 +66,22 @@ class Gp(object):
         return not(self == other) ;
 
     @classmethod
+    def set_p(cls, p):
+        Gp.p = p ;
+
+    @classmethod
     def random(cls):
-        return Gp(random.randint(0, Gp.p)) ;
+        return Gp(random.randint(0, Gp.p-1)) ;
 
 ## Class Constants
 Gp.zero = Gp(0) ;
 Gp.one = Gp(1) ;
+Gp.is_quadratic = Gp(-1) ;
+Gp.infinite = Gp(-1) ;
 
 if __name__ == "__main__":
     A = Gp(5) ;
     print(A**-3) ; 
+
+
+# has_square_root = tmp**((ECC_Arith.field.p-1)//2) ;
