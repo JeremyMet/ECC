@@ -43,6 +43,8 @@ class Gp(object):
         return Gp(x) ;
 
     def __invert__(self):
+        if self.x == 0:
+            raise("Zero is not invertible.") ;
         x = (Gp.gcd(self.x, Gp.p)[1])%Gp.p ;
         return Gp(x) ;
 
@@ -81,7 +83,9 @@ Gp.infinite = Gp(-1) ;
 
 if __name__ == "__main__":
     A = Gp(5) ;
-    print(A**-3) ; 
+    B = Gp(0) ;
+    print(A**-3) ;
+    A/B ;
 
 
 # has_square_root = tmp**((ECC_Arith.field.p-1)//2) ;

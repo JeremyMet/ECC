@@ -84,16 +84,18 @@ class ECC_Pairing(object):
 
     @staticmethod
     def Pairing(P, Q):
-        R = ECC_Arith.random_point() ;
-        S = ECC_Arith.random_point() ;
-        P2 = P + R;
-        Q2 = Q + S;
-        ordP = P.get_order();
-        ordQ = Q.get_order();
-        DivP = [(P2, 1), (R, -1)];
-        DivQ = [(Q2, 1), (S, -1)];
-        num = ECC_Pairing.Miller(P, DivQ, ordP) * (ECC_Pairing.vertical(P2, DivQ) / ECC_Pairing.line(P, R, DivQ)) ** ordP;
-        den = ECC_Pairing.Miller(Q, DivP, ordQ) * (ECC_Pairing.vertical(Q2, DivP) / ECC_Pairing.line(Q, S, DivP)) ** ordQ;
+        num, den = P.field.zero, P.field.zero ;
+        while(num == P.field.zero or den == P.field.zero):
+            R = ECC_Arith.random_point() ;
+            S = ECC_Arith.random_point() ;
+            P2 = P + R;
+            Q2 = Q + S;
+            ordP = P.get_order();
+            ordQ = Q.get_order();
+            DivP = [(P2, 1), (R, -1)];
+            DivQ = [(Q2, 1), (S, -1)];
+            num = ECC_Pairing.Miller(P, DivQ, ordP) * (ECC_Pairing.vertical(P2, DivQ) / ECC_Pairing.line(P, R, DivQ)) ** ordP;
+            den = ECC_Pairing.Miller(Q, DivP, ordQ) * (ECC_Pairing.vertical(Q2, DivP) / ECC_Pairing.line(Q, S, DivP)) ** ordQ;
         w = num / den;
         return w ;
 

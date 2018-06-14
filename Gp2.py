@@ -112,6 +112,8 @@ if __name__ == "__main__":
     # for i in range(100):
     # a = Gp2.random() ;
     a = Gp2(Gp(9), Gp(5)) ;
-    b = a ;
+    b = a**2 ;
     c = b.sqrt() ;
     print(str(a)+" || "+str(b)+" || "+str(c));
+    d = Gp2.zero ;
+    a/d ;  
