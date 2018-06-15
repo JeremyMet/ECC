@@ -5,6 +5,8 @@ from Tonelli_Shanks import * ;
 
 class Gp2(object):
 
+    p = Gp.p ;
+
     def conjugate(self):
         return Gp2(self.x, -self.y)
 
@@ -106,7 +108,7 @@ Gp2.zero = Gp2(Gp(0), Gp(0)) ;
 Gp2.one = Gp2(Gp(1), Gp(0)) ;
 Gp2.i = Gp2(Gp(0), Gp(1)) ;
 Gp2.is_quadratic = Gp2(Gp(-1), Gp(-1))
-Gp2.infinite = Gp2(Gp(-1), Gp(0)) ;
+Gp2.infinite = Gp2(Gp.infinite, Gp(0)) ;
 
 if __name__ == "__main__":
     # for i in range(100):

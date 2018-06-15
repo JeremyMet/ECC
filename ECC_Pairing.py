@@ -121,13 +121,15 @@ if __name__ == "__main__":
     ECC_Arith.set_curve(Gp2, Gp2(Gp(22),Gp(0)), Gp2(Gp(0), Gp(0))) ;
     P = ECC_Arith(Gp2(Gp(2), Gp(0)), Gp2(Gp(11), Gp(0))) ;
     Q = ECC_Arith(Gp2(Gp(21), Gp(0)), Gp2(Gp(0), Gp(12))) ;
+    Q = -Q ;
     R = ECC_Arith.random_point() ;
-
 
     w_0 = ECC_Pairing.Pairing(P, Q) ;
     w_1 = ECC_Pairing.Pairing(P+P, Q);
+    w_2 = ECC_Pairing.Pairing(Q, P);
 
     print(str(w_0*w_0)+" ... "+str(w_1)) ;
+    print(str(w_0 * w_0) + " ... " + str(w_2));
 
 
 

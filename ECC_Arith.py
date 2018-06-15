@@ -13,7 +13,7 @@ class ECC_Arith:
 
     @staticmethod
     def Inf():
-        tmp = -ECC_Arith.field.infinite ;
+        tmp = ECC_Arith.field.infinite ;
         return ECC_Arith(tmp, tmp, False) ; # Every value should be positive so negative is a way to distinguish Infinity point.
                                             # "Simulate Constant, not perfect, I don't like this solution that much".
 
@@ -105,6 +105,20 @@ class ECC_Arith:
             cpt+=1 ;
         return cpt ;
 
+
+    @classmethod
+    def frobenius(cls, P, n=1):
+        """
+        Equivalent to conjugate in G(p²)
+        """
+        x = P.x**(ECC_Arith.field.p**n) ;
+        y = P.y**(ECC_Arith.field.p**n) ;
+        return ECC_Arith(x, y) ;
+
+    def frob(self, n=1):
+        return ECC_Arith.frobenius(self, n) ;
+
+
 if __name__ == '__main__':
     Gp.set_p(23) ;
     ECC_Arith.set_curve(Gp2, Gp2(Gp(22),Gp(0)), Gp2(Gp(0),Gp(0))) ;
@@ -116,3 +130,8 @@ if __name__ == '__main__':
     print(p_2.get_order()) ;
     for i in range(p_2.get_order()):
         print(i*p_2) ;
+    print("Frobenius")
+    print(ECC_Arith.frobenius(p_1)) ;
+    print(p_1.frob()) ;
+
+    print() ;
